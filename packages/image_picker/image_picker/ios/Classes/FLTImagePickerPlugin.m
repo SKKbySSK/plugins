@@ -96,8 +96,6 @@ typedef NS_ENUM(NSInteger, ImagePickerClassType) { UIImagePickerClassType, PHPic
   _pickerViewController.presentationController.delegate = self;
 
   self.maxImagesAllowed = maxImagesAllowed;
-
-  [self checkPhotoAuthorizationForAccessLevel];
 }
 
 - (void)pickImageWithUIImagePicker {
@@ -275,37 +273,6 @@ typedef NS_ENUM(NSInteger, ImagePickerClassType) { UIImagePickerClassType, PHPic
     }
     case PHAuthorizationStatusAuthorized:
       [self showPhotoLibrary:UIImagePickerClassType];
-      break;
-    case PHAuthorizationStatusDenied:
-    case PHAuthorizationStatusRestricted:
-    default:
-      [self errorNoPhotoAccess:status];
-      break;
-  }
-}
-
-- (void)checkPhotoAuthorizationForAccessLevel API_AVAILABLE(ios(14)) {
-  PHAuthorizationStatus status = [PHPhotoLibrary authorizationStatus];
-  switch (status) {
-    case PHAuthorizationStatusNotDetermined: {
-      [PHPhotoLibrary
-          requestAuthorizationForAccessLevel:PHAccessLevelReadWrite
-                                     handler:^(PHAuthorizationStatus status) {
-                                       dispatch_async(dispatch_get_main_queue(), ^{
-                                         if (status == PHAuthorizationStatusAuthorized) {
-                                           [self showPhotoLibrary:PHPickerClassType];
-                                         } else if (status == PHAuthorizationStatusLimited) {
-                                           [self showPhotoLibrary:PHPickerClassType];
-                                         } else {
-                                           [self errorNoPhotoAccess:status];
-                                         }
-                                       });
-                                     }];
-      break;
-    }
-    case PHAuthorizationStatusAuthorized:
-    case PHAuthorizationStatusLimited:
-      [self showPhotoLibrary:PHPickerClassType];
       break;
     case PHAuthorizationStatusDenied:
     case PHAuthorizationStatusRestricted:
